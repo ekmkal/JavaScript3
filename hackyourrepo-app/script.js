@@ -100,77 +100,95 @@ function main() {
   const repoUpdate = document.querySelector('#repo-update');
   
   const reposUrl = 'https://api.github.com/orgs/HackYourFuture/repos?per_page=100';
+
+  let reposData;
   
-  // Function for hiding the place holder of the select menu. If I don't use 
-  // this function, it gives an error when it's clicked.
-  function hidePlaceHolderOption(){
-    const placeHolderOption = document.querySelector("#place-holder-option");
-    placeHolderOption.style.display = 'none';
+  // Function for errors
+  function showError() {
+    sectHeader.removeChild(selectMenu);
+    document.body.removeChild(sectFooter);
+    sectInfo.innerHTML = `
+    <div style="padding: 1rem; width: 100%; margin-right: auto; margin-left: auto;
+    background-color: #F8D7DA; color: red;">
+    <h3>Network request failed</h3>
+    </div>
+    `;
   };
   
-  // Appending child elements to the html select tag for showing the names of repos in a list.
-  // Immediately invoking the function with 'reposUrl' parameter.
-  (function setRepoList(url) {
+  // Function for appending repo names to the select menu.
+  function setRepoListMenu(url) {
     fetch(url)
     .then(response => response.json())
-    .then(reposData => {
+    .then(data => {
+      reposData = data; 
       reposData.forEach(repo => {
         const option = document.createElement("option");
         option.innerHTML = repo.name;
         repoSelection.appendChild(option);
       })
+    })
+    .catch(() => {
+      showError();
+    });
+  };
+  
+  setRepoListMenu(reposUrl);
+
+  // Function for hiding the place holder of the select menu.
+  function hidePlaceHolderOption(){
+    const placeHolderOption = document.querySelector("#place-holder-option");
+    placeHolderOption.style.display = 'none';
+  };
+
+  // Function for showing the contributor details of the repo.
+  function showContributors(url) {
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      repoContributors.innerHTML = '';
       
-      repoSelection.addEventListener('change', hidePlaceHolderOption);
-
-      repoSelection.addEventListener('change', (event) => {
-        const selectedRepoName = event.target.value;
-        
-        const selectedRepo = reposData.filter(repo => {
-          if(selectedRepoName === repo.name) {
-            return repo;
-          };
-        });
-        repoName.innerHTML = selectedRepo[0].name;
-        repoDesc.innerHTML = selectedRepo[0].description;
-        repoForks.innerHTML = selectedRepo[0].forks;
-        repoUpdate.innerHTML = selectedRepo[0].updated_at;
-
-        const selectedRepoContrsUrl = selectedRepo[0].contributors_url;
-        fetch(selectedRepoContrsUrl)
-        .then(response => response.json())
-        .then(data => {
-          repoContributors.innerHTML = '';
-          
-          data.forEach(contributor => {
-            const contr = `
-              <div class="contr">
-                <img src="${contributor.avatar_url}" alt="contributor-avatar">
-                <div class="name">
-                  <p>${contributor.login}</p>
-                </div>
-                <div class="repo-number">
-                  <p>${contributor.contributions}</p>
-                </div>
-              </div>
-            `;
-            repoContributors.innerHTML += contr;
-          });
-        })
+      data.forEach(contributor => {
+        const contr = `
+          <div class="contr">
+            <img src="${contributor.avatar_url}" alt="contributor-avatar">
+            <div class="name">
+              <p>${contributor.login}</p>
+            </div>
+            <div class="repo-number">
+              <p>${contributor.contributions}</p>
+            </div>
+          </div>
+        `;
+        repoContributors.innerHTML += contr;
       });
     })
-    .catch(err => {
-      sectHeader.removeChild(selectMenu);
-      document.body.removeChild(sectFooter);
-      sectInfo.innerHTML = `
-      <div style="padding: 1rem; width: 100%; margin-right: auto; margin-left: auto;
-      background-color: #F8D7DA; color: red;">
-      <h3>Network request failed</h3>
-      </div>
-      `;
-      console.error(err);
-    });
-  })(reposUrl);
+    .catch(() => {
+      showError();
+    })
+  };
 
+  // Function for showing all details of the repo.
+  function showRepoDetails(selectedRepoName) {
+    const selectedRepo = reposData.filter(repo => {
+      if(selectedRepoName === repo.name) {
+        return repo;
+      };
+    });
+    repoName.innerHTML = selectedRepo[0].name;
+    repoDesc.innerHTML = selectedRepo[0].description;
+    repoForks.innerHTML = selectedRepo[0].forks;
+    repoUpdate.innerHTML = selectedRepo[0].updated_at;
+    
+    const selectedRepoContrsUrl = selectedRepo[0].contributors_url;
+    showContributors(selectedRepoContrsUrl);
+  };
+
+  repoSelection.addEventListener('change', (event) => {
+    hidePlaceHolderOption();
+    
+    const currentSelectedRepoName = event.target.value;
+    showRepoDetails(currentSelectedRepoName);
+  });
 };
 
 window.addEventListener('load', main);

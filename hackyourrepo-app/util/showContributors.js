@@ -4,73 +4,64 @@ import * as mainVars from "../script.js";
 import { showPage } from "./showPage.js";
 import { showError } from "./showError.js";
 
-// Function for showing the contributor details of the repo.
+function createContrPage(indexNum) {
+    const page = document.createElement('a');
+    page.innerHTML = indexNum/5 + 1;
+    page.value = indexNum/5 + 1;
+    page.className = 'page';
+    mainVars.pageNumbers.appendChild(page);
+};
+
 export function showContributors(url) {
     fetch(url)
     .then(response => response.json())
     .then(data => {
         mainVars.repoContributors.innerHTML = '';
         mainVars.pageNumbers.innerHTML = '';
-        
+
         for (let i=0; i < data.length; i++) {
-            if(i % 5 === 0){
-                const page = document.createElement('a');
-                page.innerHTML = i/5 + 1;
-                page.value = i/5 + 1;
-                page.className = 'page';
-                mainVars.pageNumbers.appendChild(page);
-            };
+            if(i % 5 === 0) createContrPage(i);
         };
         
-        mainVars.pagination.style.display = 'flex';
+        (data.length > 5) ? 
+        mainVars.pagination.style.display = 'flex' : 
+        mainVars.pagination.style.display = 'none';
         
-        showPage(data, 0);
-
-        mainVars.pageNumbers.addEventListener('click', (event) => {
-            showPage(data, (event.target.value - 1));
-        });
-
-        mainVars.backPage.addEventListener('click', () => {
+        showPage(data, 1);
+        let activePage = 1;
+        
+        function changePage(event) {
+            const value = event.target.value;
             const pageNodes = mainVars.pageNumbers.childNodes;
-            const lastPageIndex = parseInt(Object.keys(pageNodes).pop());
-
-            for (let key of Object.keys(pageNodes)) {
-                // if(pageNodes[key].className === 'active') {
-                //     if (key > 0) {
-                //         console.log(key);
-                //         showPage(data, (key - 1));
-                //     } else {
-                //         console.log(lastPageIndex);
-                //         showPage(data, lastPageIndex);
-                //     };
-                // };
-
-                if (pageNodes[0].className === 'active') {
-                    console.log(lastPageIndex);
-                    showPage(data, lastPageIndex);
-                } else if(pageNodes[key].className === 'active' && key >= 1) {
-                    console.log(key);
-                    showPage(data, (key - 1));
-                };
-            };
-        });
-
-        mainVars.nextPage.addEventListener('click', () => {
-            const pageNodes = mainVars.pageNumbers.childNodes;
-            const lastPageIndex = parseInt(Object.keys(pageNodes).pop());
-
-            for (let key of Object.keys(pageNodes)) {
-                if(pageNodes[key].className === 'active') {
-                    if (key < lastPageIndex) {
-                        console.log(lastPageIndex);
-                        showPage(data, (key + 1));
+            const lastPageNum = pageNodes.length;
+        
+            switch (value) {
+                case ('backPage'):
+                    if (activePage > 1) {
+                        showPage(data, activePage - 1);
+                        activePage -= 1;
                     } else {
-                        // const lastPageIndex = parseInt(Object.keys(pageNodes).pop());
-                        showPage(data, 0);
+                        showPage(data, lastPageNum);
+                        activePage = lastPageNum;
                     };
-                };
+                    break;
+                case ('nextPage'):
+                    if (activePage < lastPageNum) {
+                        showPage(data, activePage + 1);
+                        activePage += 1;
+                    } else {
+                        showPage(data, 1);
+                        activePage = 1;
+                    };
+                    break;
+                default:
+                    showPage(data, parseInt(value));
+                    activePage = parseInt(value);
+                    break;
             };
-        });
+        };
+
+        mainVars.pagination.addEventListener('click', changePage);
     })
     .catch(() => {
         showError();

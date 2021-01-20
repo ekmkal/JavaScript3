@@ -3,7 +3,6 @@
 import { reposData } from "./setRepoListMenu.js";
 import { showContributors } from "./showContributors.js";
 
-// Function for showing all details of the repo.
 export function showRepoDetails(selectedRepoName) {
     const selectedRepo = reposData.filter(repo => {
         if(selectedRepoName === repo.name) return repo;

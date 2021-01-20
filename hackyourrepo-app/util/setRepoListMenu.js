@@ -5,7 +5,6 @@ import { showError } from "./showError.js"
 
 export let reposData;
 
-// Function for appending repo names to the select menu.
 export function setRepoListMenu(url) {
     fetch(url)
     .then(response => response.json())

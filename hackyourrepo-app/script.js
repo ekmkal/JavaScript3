@@ -89,6 +89,7 @@ const pagination = document.createElement('div');
 const backPage = document.createElement('a');
 backPage.innerHTML = '&laquo';
 backPage.className = 'scrollSymbols';
+backPage.value = 'backPage';
 pagination.appendChild(backPage);
 const pageNumbers = document.createElement('div');
 pageNumbers.className = 'pageNumbers';
@@ -96,6 +97,7 @@ pagination.appendChild(pageNumbers);
 const nextPage = document.createElement('a');
 nextPage.innerHTML = '&raquo';
 nextPage.className = 'scrollSymbols';
+nextPage.value = 'nextPage';
 pagination.appendChild(nextPage);
 pagination.className = 'pagination';
 repoContrWrap.appendChild(pagination);
@@ -111,7 +113,6 @@ sectFooter.appendChild(sectFooterPara);
 document.body.appendChild(sectFooter);
 
 
-// Declaring 'main' function
 function main() {
   const reposUrl = 'https://api.github.com/orgs/HackYourFuture/repos?per_page=100';
   setRepoListMenu(reposUrl);

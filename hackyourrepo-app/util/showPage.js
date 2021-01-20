@@ -8,9 +8,9 @@ export function showPage(arrayOfData, pageNumber) {
     mainVars.pageNumbers.childNodes.forEach(childPage => {
         childPage.className = 'page';
     });
-    mainVars.pageNumbers.childNodes[pageNumber].className = 'active';
+    mainVars.pageNumbers.childNodes[pageNumber - 1].className = 'active';
 
-    arrayOfData.slice((pageNumber * 5), ((pageNumber +1) * 5)).forEach(contributor => {
+    arrayOfData.slice(((pageNumber - 1) * 5), (pageNumber * 5)).forEach(contributor => {
         const contr = `
             <div class="contr">
                 <img src="${contributor.avatar_url}" alt="contributor-avatar">
